@@ -19,3 +19,22 @@ func ExampleContext() {
 	// associated with ctx, if any, else default to [log/slog.Default].
 	Info(ctx, "hello world", slog.String("foo", "bar"))
 }
+
+func ExampleWith() {
+	// create a [*log/slog.Logger] which prints
+	// JSON-formatted messages to [os.Stderr].
+	log := slog.New(slog.NewJSONHandler(os.Stderr, nil))
+
+	// create new a [context.Context] with a
+	// given [*log/slog.Logger] associated.
+	ctx := Context(context.Background(), log)
+
+	ctx = With(ctx, slog.Group("request",
+		slog.String("method", "GET"),
+		slog.String("path", "/login"),
+	))
+
+	// note that any arguments associated with ctx earlier
+	// by calling [With] are included in the message too.
+	Info(ctx, "handle request", slog.String("foo", "bar"))
+}
