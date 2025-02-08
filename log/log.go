@@ -25,6 +25,10 @@ func With(ctx context.Context, args ...any) context.Context {
 	return Context(ctx, Logger(ctx).With(args...))
 }
 
+func Err(err error) slog.Attr {
+	return slog.Any("error", err)
+}
+
 func handle(ctx context.Context, lvl slog.Level, msg string, args ...any) {
 	log := Logger(ctx)
 
