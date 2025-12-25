@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+// timeNow allows overriding the "current" timestamp
+// used for creating new log records during testing.
+var timeNow func() time.Time = time.Now
+
 type contextKey struct{}
 
 func Logger(ctx context.Context) *slog.Logger {
@@ -41,7 +45,7 @@ func handle(ctx context.Context, lvl slog.Level, msg string, args ...any) {
 	// NOTE: skip [runtime.Callers, this function, this function's caller]
 	runtime.Callers(3, pc[:])
 
-	r := slog.NewRecord(time.Now().UTC(), lvl, msg, pc[0])
+	r := slog.NewRecord(timeNow().UTC(), lvl, msg, pc[0])
 	r.Add(args...) // add the given arguments to the record
 
 	_ = log.Handler().Handle(ctx, r) // NOTE: we ignore the error (if any)
