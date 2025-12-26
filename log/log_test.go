@@ -3,6 +3,7 @@ package log
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"log/slog"
 	"strings"
@@ -83,6 +84,52 @@ func TestWith(t *testing.T) {
 
 	if got := strings.TrimSpace(buf.String()); got != want {
 		t.Errorf("invalid message: got=%q want=%q", got, want)
+	}
+}
+
+func TestErr(t *testing.T) {
+	timeNow = func() time.Time {
+		// NOTE: override the "current" timestamp with a static value during testing
+		// to be able to compare the actual against the expected log message output.
+		return time.Date(2025, time.December, 25, 12, 28, 19, 0, time.UTC)
+	}
+
+	t.Cleanup(func() { timeNow = time.Now })
+
+	tests := []struct {
+		name  string
+		error error
+
+		want string
+	}{
+		{
+			name:  "non-nil error value",
+			error: errors.New("internal error"),
+
+			want: `{"time":"2025-12-25T12:28:19Z","level":"WARN","msg":"something went wrong","error":"internal error"}`,
+		},
+		{
+			name:  "nil error value",
+			error: nil,
+
+			want: `{"time":"2025-12-25T12:28:19Z","level":"WARN","msg":"something went wrong","error":null}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var buf bytes.Buffer
+
+			slog.SetDefault(slog.New(slog.NewJSONHandler(&buf, nil)))
+
+			ctx := context.Background()
+
+			Warn(ctx, "something went wrong", Err(tt.error))
+
+			if got := strings.TrimSpace(buf.String()); got != tt.want {
+				t.Errorf("invalid message: got=%q want=%q", got, tt.want)
+			}
+		})
 	}
 }
 
