@@ -138,7 +138,7 @@ func run(cfg config) error {
 		return fmt.Errorf("create annotated tag: %w", err)
 	}
 
-	log, err := cfg.git("log", "-1", "--patch")
+	log, err := cfg.git("show", "--patch", "--show-signature", tag)
 
 	if err != nil {
 		return fmt.Errorf("show log for new tag: %w", err)
