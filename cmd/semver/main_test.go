@@ -149,6 +149,23 @@ func TestRun(t *testing.T) {
 				args: []string{"patch"},
 			},
 			{
+				name: "non-empty index",
+
+				setup: func(t *testing.T, r, remote *repository) {
+					name := filepath.Join(r.local, "dirty.txt")
+					data := []byte("dirty")
+
+					if err := os.WriteFile(name, data, 0644); err != nil {
+						t.Fatalf("write file (name=%q): err=%v", name, err)
+					}
+
+					// NOTE: we stage the file (but do not commit).
+					r.git("add", name)
+				},
+
+				args: []string{"patch"},
+			},
+			{
 				name: "out of date",
 
 				setup: func(t *testing.T, r, remote *repository) {
