@@ -198,7 +198,7 @@ func git(dir string, args ...string) (string, error) {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		if _, ok := errors.AsType[*exec.ExitError](err); ok {
+		if exitError := new(exec.ExitError); errors.As(err, &exitError) {
 			return "", fmt.Errorf("git: %s", strings.TrimSpace(stderr.String()))
 		}
 
