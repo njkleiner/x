@@ -94,6 +94,7 @@ func run(cfg config) error {
 	}
 
 	if list != "" {
+		// TODO: what if more than one tag exists on top of HEAD?
 		latest, err := cfg.git("describe", "--tags", "--abbrev=0")
 
 		if err != nil {
