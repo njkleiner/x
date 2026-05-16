@@ -32,6 +32,7 @@ func clone(t *testing.T, remote *repository) *repository {
 	r := &repository{t: t, local: t.TempDir()}
 
 	r.git("clone", remote.local, ".")
+	r.git("branch", "-M", "main")
 
 	r.git("config", "user.email", "author@domain.invalid")
 	r.git("config", "user.name", "Test Author")
