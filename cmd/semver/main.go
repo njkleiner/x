@@ -71,7 +71,7 @@ func run(cfg config) error {
 		return fmt.Errorf("resolve HEAD: %w", err)
 	}
 
-	upstream, err := cfg.git("rev-parse", "@{u}")
+	upstream, err := cfg.git("rev-parse", fmt.Sprintf("%s/%s", cfg.remote, cfg.branch))
 
 	if err != nil {
 		return fmt.Errorf("resolve upstream: %w", err)
