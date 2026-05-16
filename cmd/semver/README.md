@@ -18,3 +18,5 @@
 - `semver` discards any prerelease or build information when parsing existing Git tags
 - `semver` does not support adding prerelease or build information when creating new Git tags
 - `semver` assumes that the Git commit that carries the latest tag only carries a single tag
+- `semver` will sign the newly created Git tag if(f) `tag.gpgSign` is set in the Git config
+  - Note that `semver` will always validate the signature (if any) after creating the Git tag
