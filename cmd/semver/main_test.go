@@ -176,6 +176,17 @@ func TestRun(t *testing.T) {
 
 				arg: "patch",
 			},
+			{
+				name: "conflicting tags",
+
+				setup: func(t *testing.T, r, remote *repository) {
+					r.tag("v0.1.0")
+					r.tag("v0.2.0")
+					r.push()
+				},
+
+				arg: "patch",
+			},
 		}
 
 		for _, tt := range tests {

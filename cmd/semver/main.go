@@ -102,11 +102,28 @@ func run(cfg config) error {
 	}
 
 	if list != "" {
-		// TODO: what if more than one tag exists on top of HEAD?
 		latest, err := cfg.git("describe", "--tags", "--abbrev=0")
 
 		if err != nil {
 			return fmt.Errorf("describe latest tag: %w", err)
+		}
+
+		commit, err := cfg.git("rev-list", "-1", latest)
+
+		if err != nil {
+			return fmt.Errorf("resolve commit: %w", err)
+		}
+
+		all, err := cfg.git("tag", "--points-at", commit)
+
+		if err != nil {
+			return fmt.Errorf("show other tags: %w", err)
+		}
+
+		if all != latest {
+			// NOTE: if the commit references more than just the "latest" tag,
+			// we are not guaranteed to have found the correct "latest" tag...
+			return fmt.Errorf("commit %q references multiple tags", commit)
 		}
 
 		v, err = parse(latest)
