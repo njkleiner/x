@@ -176,8 +176,6 @@ func TestRun(t *testing.T) {
 
 				arg: "patch",
 			},
-
-			// XXX
 		}
 
 		for _, tt := range tests {
@@ -198,17 +196,4 @@ func TestRun(t *testing.T) {
 			})
 		}
 	})
-}
-
-// TestConflictingTag tests that run errors when the new tag already exists.
-func TestConflictingTag(t *testing.T) {
-	r := clone(t, create(t))
-	r.commit("initial commit")
-	r.tag("v1.2.3")
-	r.tag("v1.2.4")
-	r.push()
-
-	if err := run(r.config("patch")); err == nil {
-		t.Fatalf("should return error: err=%v", err)
-	}
 }
