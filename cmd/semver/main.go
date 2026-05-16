@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"cmp"
 	"errors"
 	"flag"
 	"fmt"
@@ -21,8 +20,15 @@ func main() {
 
 	flag.Parse()
 
-	cfg.args = flag.Args()
 	cfg.dir, _ = os.Getwd()
+
+	switch arg := flag.Arg(0); arg {
+	case "major", "minor", "patch":
+		cfg.arg = arg // NOTE: propagate known-valid "bump" operation type.
+	default:
+		fmt.Fprintln(os.Stderr, "syntax: <major|minor|patch>")
+		os.Exit(1) // TODO: THINK: use a different exit code?
+	}
 
 	if err := run(cfg); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -34,8 +40,8 @@ type config struct {
 	branch string
 	remote string
 
-	args []string
-	dir  string
+	arg string
+	dir string
 }
 
 func (cfg config) git(args ...string) (string, error) {
@@ -108,7 +114,7 @@ func run(cfg config) error {
 		}
 	}
 
-	switch arg := cmp.Or(cfg.args...); arg {
+	switch cfg.arg {
 	case "major":
 		v.major++
 		v.minor = 0
@@ -119,7 +125,8 @@ func run(cfg config) error {
 	case "patch":
 		v.patch++
 	default:
-		return fmt.Errorf("syntax: %s <major|minor|patch>", os.Args[0])
+		// NOTE: for future-safety (actually unreachable).
+		return fmt.Errorf("unknown argument: %q", cfg.arg)
 	}
 
 	tag := v.String()

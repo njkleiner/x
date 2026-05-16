@@ -70,8 +70,8 @@ func (r *repository) push() {
 }
 
 // config returns a config for the test repository.
-func (r *repository) config(args ...string) config {
-	return config{branch: "main", remote: "origin", args: args, dir: r.local}
+func (r *repository) config(arg string) config {
+	return config{branch: "main", remote: "origin", arg: arg, dir: r.local}
 }
 
 func TestRun(t *testing.T) {
@@ -79,16 +79,16 @@ func TestRun(t *testing.T) {
 		tests := []struct {
 			name   string
 			latest string // empty means no prior tag
-			args   []string
+			arg    string
 			want   string
 		}{
-			{name: "patch", latest: "v1.2.3", args: []string{"patch"}, want: "v1.2.4"},
-			{name: "minor", latest: "v1.2.3", args: []string{"minor"}, want: "v1.3.0"},
-			{name: "major", latest: "v1.2.3", args: []string{"major"}, want: "v2.0.0"},
+			{name: "patch", latest: "v1.2.3", arg: "patch", want: "v1.2.4"},
+			{name: "minor", latest: "v1.2.3", arg: "minor", want: "v1.3.0"},
+			{name: "major", latest: "v1.2.3", arg: "major", want: "v2.0.0"},
 
-			{name: "patch without previous tag", latest: "", args: []string{"patch"}, want: "v0.0.1"},
-			{name: "minor without previous tag", latest: "", args: []string{"minor"}, want: "v0.1.0"},
-			{name: "major without previous tag", latest: "", args: []string{"major"}, want: "v1.0.0"},
+			{name: "patch without previous tag", latest: "", arg: "patch", want: "v0.0.1"},
+			{name: "minor without previous tag", latest: "", arg: "minor", want: "v0.1.0"},
+			{name: "major without previous tag", latest: "", arg: "major", want: "v1.0.0"},
 		}
 
 		for _, tt := range tests {
@@ -102,7 +102,7 @@ func TestRun(t *testing.T) {
 
 				r.push()
 
-				if err := run(r.config(tt.args...)); err != nil {
+				if err := run(r.config(tt.arg)); err != nil {
 					t.Fatalf("should bump version: err=%v", err)
 				}
 
@@ -121,7 +121,7 @@ func TestRun(t *testing.T) {
 
 			setup func(t *testing.T, r, remote *repository)
 
-			args []string
+			arg string
 
 			// TODO: compare actual error against expected message
 		}{
@@ -132,7 +132,7 @@ func TestRun(t *testing.T) {
 					r.git("checkout", "-b", "feature/foo")
 				},
 
-				args: []string{"patch"},
+				arg: "patch",
 			},
 			{
 				name: "dirty worktree",
@@ -146,7 +146,7 @@ func TestRun(t *testing.T) {
 					}
 				},
 
-				args: []string{"patch"},
+				arg: "patch",
 			},
 			{
 				name: "non-empty index",
@@ -163,7 +163,7 @@ func TestRun(t *testing.T) {
 					r.git("add", name)
 				},
 
-				args: []string{"patch"},
+				arg: "patch",
 			},
 			{
 				name: "out of date",
@@ -174,7 +174,7 @@ func TestRun(t *testing.T) {
 					r2.push()
 				},
 
-				args: []string{"patch"},
+				arg: "patch",
 			},
 
 			// XXX
@@ -192,7 +192,7 @@ func TestRun(t *testing.T) {
 					tt.setup(t, r, remote)
 				}
 
-				if err := run(r.config(tt.args...)); err == nil {
+				if err := run(r.config(tt.arg)); err == nil {
 					t.Fatalf("should return error: err=%v", err)
 				}
 			})
@@ -209,17 +209,6 @@ func TestConflictingTag(t *testing.T) {
 	r.push()
 
 	if err := run(r.config("patch")); err == nil {
-		t.Fatalf("should return error: err=%v", err)
-	}
-}
-
-// TestInvalidArg tests that run errors on an unrecognised argument.
-func TestInvalidArg(t *testing.T) {
-	r := clone(t, create(t))
-	r.commit("initial commit")
-	r.push()
-
-	if err := run(r.config("bogus")); err == nil {
 		t.Fatalf("should return error: err=%v", err)
 	}
 }
