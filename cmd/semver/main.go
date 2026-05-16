@@ -1,3 +1,5 @@
+// Program semver implements a simple interface for creating
+// Git tags conforming to the Semantic Versioning standard.
 package main
 
 import (
