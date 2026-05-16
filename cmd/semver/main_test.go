@@ -45,7 +45,7 @@ func (r *repository) git(args ...string) string {
 	out, err := git(r.local, args...)
 
 	if err != nil {
-		r.t.Fatalf("git: %v", err)
+		r.t.Fatal(err)
 	}
 
 	return out
