@@ -19,8 +19,7 @@ func create(t *testing.T) *repository {
 	t.Helper()
 
 	r := &repository{t: t, local: t.TempDir()}
-
-	r.git("init", "--bare")
+	r.git("init", "--bare", "--initial-branch", "main")
 
 	return r
 }
